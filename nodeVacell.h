@@ -2,9 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
+
+typedef struct{
+    int x,y;
+}point;
 
 typedef struct{
     int type;
+    point position;
+    bool empty;
     struct node* north;
     struct node* north_east;
     struct node* north_west;
@@ -13,11 +20,14 @@ typedef struct{
     struct node* south_west;
 } node;
 
-node* create_node(int n)
+node* create_node(int n,int xx,int yy)
 {
     node* my_node;
     my_node=(node*)malloc(sizeof(node));
     my_node->type=n;
+    my_node->position.x=xx;
+    my_node->position.y=yy;
+    my_node->empty=true;
     my_node->south_west=NULL;
     my_node->south_east=NULL;
     my_node->south=NULL;
@@ -25,18 +35,17 @@ node* create_node(int n)
     my_node->north_east=NULL;
     my_node->north=NULL;
     return my_node;
-
 }
 
 node* create_node_line (int i,int **map,int size) //i shomare khat, pointer be avalin node e oon khat ro bar migardoone
 {
-    node* head=create_node(map[i][0]);
+    node* head=create_node(map[i][0],0,size-i-1);
     node* current=head;
     node* new_node;
     int f;
     for (f=1;f<size;f++)
     {
-        new_node=create_node(map[i][f]);
+        new_node=create_node(map[i][f],f,size-i-1);
         if (f%2==1)
         {
             current->south_east=new_node;
@@ -102,34 +111,27 @@ node* make_network(int **map,int size)
     return node1;
 }
 
-typedef struct{
-    int x,y;
-}point;
-
 int name_search(char* name,FILE* fp)
 {
     FILE *ftemp=fp;
     fseek(ftemp,0,SEEK_SET);
     char* temp=malloc(8*sizeof(char));
-    while(fscanf(ftemp,"%s",temp)!=EOF)
+    while(1)
     {
+        fread(temp,sizeof(char),8,ftemp);
         if (strcmp(name,temp)==0)
             return 1;
+        if (feof(ftemp))
+            return 0;
     }
-    return 0;
 }
 
-void write_name(FILE* fp,char* name)
-{
-    int i;
-    for (i=0;i<7;i++)
-        fputc(name[i],fp);
-    fputc('\n',fp);
-}
 
 char* rand_name(void)
 {
-    FILE* fp=fopen("cell.txt","a+");
+    //FILE* ff=fopen("cell.bin","wb");
+    //fclose(ff);
+    FILE* fp=fopen("cell.bin","rb");
     if (fp==NULL)
     {
         printf("Cannot open cell list\n");
@@ -137,11 +139,11 @@ char* rand_name(void)
     }
     srand(time(0));
     char *name,c[2];
-    name=(char*)malloc(8*sizeof(char));
-    int i,type;
+    int i,type;    
+    c[1]='\0';
     do
     {
-        c[1]='\0';
+        name=(char*)calloc(8,sizeof(char));
         for (i=0;i<7;i++)
         {
             type=rand()%3;
@@ -155,15 +157,15 @@ char* rand_name(void)
         }
     }while(name_search(name,fp));
     fclose(fp);
-    fp=fopen("cell.txt","a");
-    fprintf(fp,"%s\n",name);
+    fp=fopen("cell.bin","ab");
+    fseek(fp,0,SEEK_END);
+    fwrite(name,sizeof(char),8,fp);
     fclose(fp);
     return name;
 }
 
 typedef struct{
     node* location;
-    point position;
     int energy;
     char* name;
     struct cell* next;
@@ -191,29 +193,92 @@ cell* create_cell(int in_num,int size,node* head)
     srand(time(0));
     point p;
     cell* cell_head = malloc (sizeof(cell)),*current;
+    if (cell_head==NULL)
+        {
+            printf("problem with malloc\n");
+            exit(-1);
+        }
+    cell_head->name=(char*)malloc(8*sizeof(char));
     cell_head->energy=0;
     cell_head->name=rand_name();
     cell_head->next=NULL;
     p.x=rand()%size;
     p.y=rand()%size;
-    cell_head->position=p;
     cell_head->location=find_node(p,head);
     current=cell_head;
     for (i=1;i<in_num;i++)
     {
         cell* new_cell=malloc(sizeof(cell));
+        if (new_cell==NULL)
+        {
+            printf("problem with malloc\n");
+            exit(-1);
+        }
+        new_cell->name=(char*)calloc(8,sizeof(char));
         new_cell->energy=0;
-        sleep(1);
-        new_cell->name=rand_name();
+        strcpy(new_cell->name,rand_name());
         new_cell->next=NULL;
-        p.x=rand()%size;
+        p.x=rand()%size;        //bayad chek koni ke position esh tekrari nashe !
         p.y=rand()%size;
-        new_cell->position=p;
         new_cell->location=find_node(p,head);
         current->next=new_cell;
         current=current->next;
     }
     return cell_head;
 }
+
+void cell_move(cell* head,int th,int direction)
+{
+    int i=1;
+    cell* current=head;
+    while (current!=NULL && i<th)
+    {
+        current=current->next;
+        i++;
+    }
+    if (i!=th){
+        printf("wrong address\n");
+        exit(-1);
+    }
+    printf("dada\n");
+    node* place=current->location;
+    switch(direction)
+    {
+        case 1:{
+            place=place->north;
+            break;
+        }
+        case 2:{
+            place=place->south;
+            break;
+        }
+        case 3:{
+            place=place->north_east;
+            break;
+        }
+        case 4:{
+            place=place->north_west;
+            break;
+        }
+        case 5:{
+            place=place->south_east;
+            break;
+        }
+        case 6:{
+            place=place->south_west;
+            break;
+        }
+    }
+    if (place!=NULL ){ //&& (place->location)->type!=3
+        current->location=place;
+        printf("moved successfully\n");
+    }
+    else
+    {
+        printf("bad move\n");
+    }
+
+}
+
 
 
