@@ -184,6 +184,8 @@ node* find_node(point p,node* head)
         else
             current=current->north_east;
     }
+    if (current->empty==false)          //inja bayad type e node ro ham lahaz koni
+        return NULL;
     return current;
 }
 
@@ -202,9 +204,15 @@ cell* create_cell(int in_num,int size,node* head)
     cell_head->energy=0;
     cell_head->name=rand_name();
     cell_head->next=NULL;
-    p.x=rand()%size;
-    p.y=rand()%size;
-    cell_head->location=find_node(p,head);
+    cell_head->location=NULL;
+    
+    while(cell_head->location==NULL)
+    {
+        p.x=rand()%size;
+        p.y=rand()%size;
+        cell_head->location=find_node(p,head);
+    }
+    (cell_head->location)->empty=false;         //por shodan node!
     current=cell_head;
     for (i=1;i<in_num;i++)
     {
@@ -216,11 +224,17 @@ cell* create_cell(int in_num,int size,node* head)
         }
         new_cell->name=(char*)calloc(8,sizeof(char));
         new_cell->energy=0;
-        strcpy(new_cell->name,rand_name());
+        new_cell->name=rand_name();
         new_cell->next=NULL;
-        p.x=rand()%size;        //bayad chek koni ke position esh tekrari nashe !
-        p.y=rand()%size;
-        new_cell->location=find_node(p,head);
+        new_cell->location=NULL;
+        
+        while(new_cell->location==NULL)
+        {
+            p.x=rand()%size;        //bayad chek koni ke position esh tekrari nashe !
+            p.y=rand()%size;
+            new_cell->location=find_node(p,head);
+        }
+        (new_cell->location)->empty=false;          //por shodan node!
         current->next=new_cell;
         current=current->next;
     }
@@ -236,11 +250,10 @@ void cell_move(cell* head,int th,int direction)
         current=current->next;
         i++;
     }
-    if (i!=th){
+    if (current==NULL){
         printf("wrong address\n");
-        exit(-1);
+        return NULL;
     }
-    printf("dada\n");
     node* place=current->location;
     switch(direction)
     {
@@ -268,16 +281,33 @@ void cell_move(cell* head,int th,int direction)
             place=place->south_west;
             break;
         }
+        default:{
+            printf("wrong input\n");
+            return NULL;
+            break;
+        }
     }
-    if (place!=NULL ){ //&& (place->location)->type!=3
+    if (place!=NULL ){ //&& (place->type!=3) && (place->empty==true)
+        (current->location)->empty=true;
         current->location=place;
+        (current->location)->empty=false;
         printf("moved successfully\n");
     }
     else
     {
         printf("bad move\n");
     }
+}
 
+void print_cells(cell* head)
+{
+    int i=1;
+    while(head!=NULL)
+    {
+        printf("%d) %s (%d, %d)\n",i,head->name,(head->location)->position.x,(head->location)->position.y);
+        head=head->next;
+        i++;
+    }
 }
 
 
