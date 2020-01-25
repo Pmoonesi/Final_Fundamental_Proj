@@ -184,7 +184,7 @@ node* find_node(point p,node* head)
         else
             current=current->north_east;
     }
-    if (current->empty==false)          //inja bayad type e node ro ham lahaz koni
+    if (current->empty==false || current->type==3)          //inja bayad type e node ro ham lahaz koni
         return NULL;
     return current;
 }
@@ -196,10 +196,10 @@ cell* create_cell(int in_num,int size,node* head)
     point p;
     cell* cell_head = malloc (sizeof(cell)),*current;
     if (cell_head==NULL)
-        {
-            printf("problem with malloc\n");
-            exit(-1);
-        }
+    {
+        printf("problem with malloc\n");
+        exit(-1);
+    }
     cell_head->name=(char*)malloc(8*sizeof(char));
     cell_head->energy=0;
     cell_head->name=rand_name();
@@ -241,7 +241,7 @@ cell* create_cell(int in_num,int size,node* head)
     return cell_head;
 }
 
-void cell_move(cell* head,int th,int direction)
+cell* find_cell(cell* head,int th)
 {
     int i=1;
     cell* current=head;
@@ -252,6 +252,65 @@ void cell_move(cell* head,int th,int direction)
     }
     if (current==NULL){
         printf("wrong address\n");
+    }
+    return current;
+}
+
+bool allowd_place(node* place)
+{
+    if (place!=NULL && place->type!=3 && place->empty==true)
+        return true;
+    return false;
+}
+
+int rand_adj (node* place)
+{    
+    int res=0,i;
+    char c[2],*adj;
+    c[1]='\0';
+    
+    adj=(char*)calloc(7,sizeof(char));
+    if(allowd_place(place->north)==1)
+    {
+        c[0]='1';
+        strcat(adj,c);
+    }
+    if(allowd_place(place->south)==1)
+    {
+        c[0]='2';
+        strcat(adj,c);
+    }
+    if(allowd_place(place->north_east)==1)
+    {
+        c[0]='3';
+        strcat(adj,c);
+    }
+    if(allowd_place(place->north_west)==1)
+    {
+        c[0]='4';
+        strcat(adj,c);
+    }
+    if(allowd_place(place->south_east)==1)
+    {
+        c[0]='5';
+        strcat(adj,c);
+    }
+    if(allowd_place(place->south_west)==1)
+    {
+        c[0]='6';
+        strcat(adj,c);
+    }
+    if (strlen(adj)==0)
+        return 0;
+    i=rand()%strlen(adj);
+    res=adj[i]-'0';
+    return res;
+}
+
+void cell_move(cell* head,int th,int direction)
+{
+    cell* current=find_cell(head,th);
+    if (current==NULL){
         return NULL;
     }
     node* place=current->location;
@@ -287,7 +346,7 @@ void cell_move(cell* head,int th,int direction)
             break;
         }
     }
-    if (place!=NULL ){ //&& (place->type!=3) && (place->empty==true)
+    if (allowd_place(place)){ 
         (current->location)->empty=true;
         current->location=place;
         (current->location)->empty=false;
@@ -310,5 +369,61 @@ void print_cells(cell* head)
     }
 }
 
+void delete_cell(cell** head,int th)
+{
+    if (th==1)
+    {
+        *head=(*head)->next;
+    }
+    else
+    {
+        cell* current=find_cell(*head,th-1);
+        cell* next_cell;
+        next_cell=current->next;
+        current->next=next_cell->next;
+    }
+}
 
+void split_cell(cell** headhead,int th)
+{
+    int dir;
+    cell* head=*headhead;
+    cell* current_c=find_cell(head,th);
+    node* current_n=current_c->location;
+    dir=rand_adj(current_n);
+    if (current_n->type!=4 || !dir )//(|| current_c->energy>=80) vaghti energy ro dorost kardi
+    {
+        printf("Can't be done\n");
+        return NULL;
+    }
+    cell* new_cell1 = malloc (sizeof(cell)),*new_cell2=malloc(sizeof(cell));
+    if (new_cell1==NULL)
+    {
+        printf("problem with malloc\n");
+        exit(-1);
+    }
+    new_cell1->name=(char*)malloc(8*sizeof(char));
+    new_cell1->energy=40;
+    new_cell1->name=rand_name();
+    new_cell1->next=NULL;
+    new_cell1->location=current_n;
+    (new_cell1->location)->empty=false;
+    if (new_cell2==NULL)
+    {
+        printf("problem with malloc\n");
+        exit(-1);
+    }
+    new_cell2->name=(char*)malloc(8*sizeof(char));
+    new_cell2->energy=40;
+    new_cell2->name=rand_name();
+    new_cell2->next=NULL;
+    new_cell2->location=current_n;
+    (new_cell2->location)->empty=false;
+    cell_move(new_cell2,1,dir);
+    while(current_c->next!=NULL)
+        current_c=current_c->next;
+    current_c->next=new_cell1;
+    new_cell1->next=new_cell2;
+    delete_cell(headhead,th);   
+}
 

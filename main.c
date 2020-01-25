@@ -6,6 +6,7 @@
 
 int main()
 {
+    srand(time(0));
     bool loop=true;
     int p;
     int i,j,n,c;
@@ -15,17 +16,20 @@ int main()
     for (i=0;i<n;i++)
     {
         ma_p[i]=(int*)malloc(n*sizeof(int));
-        for (j=0;j<n;j++)
-            ma_p[i][j]=i+j;
-
+        for (j=0;j<n;j++){
+            ma_p[i][j]=rand()%4+1;
+            printf("%d ",ma_p[i][j]);
+        }
+        printf("\n");
     }
     node* head=make_network(ma_p,n);
+    
     scanf("%d",&c);
     cell* cell_head=create_cell(c,n,head);
 
     while (loop)
     {
-        printf("[1]move cell\n[2]exit\n");
+        printf("[1]move cell\n[2]split cell\n[3]exit\n");
         scanf("%d",&i);
         if (i==1)
         {
@@ -37,6 +41,13 @@ int main()
             cell_move(cell_head,p,j);
         }
         else if (i==2)
+        {
+            printf("which one of the following cells ?\n");
+            print_cells(cell_head);
+            scanf("%d",&p);
+            split_cell(&cell_head,p);
+        }
+        else if (i==3)
             loop=false;
         else 
             printf("invalid input\n");
