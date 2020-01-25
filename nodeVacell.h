@@ -11,6 +11,7 @@ typedef struct{
 typedef struct{
     int type;
     point position;
+    int source;
     bool empty;
     struct node* north;
     struct node* north_east;
@@ -25,6 +26,9 @@ node* create_node(int n,int xx,int yy)
     node* my_node;
     my_node=(node*)malloc(sizeof(node));
     my_node->type=n;
+    my_node->source=0;
+    if (n==1)
+        my_node->source=100;
     my_node->position.x=xx;
     my_node->position.y=yy;
     my_node->empty=true;
@@ -81,7 +85,7 @@ void merge_lines(node* head1,node* head2,int size)
             current1->south=current2;
             current2=current2->north_east;
         }
-        else if (i!=size-1)
+        else if (i%2==0)
         {
             current2->north_west=current1;
             current1->south_east=current2;
@@ -260,6 +264,12 @@ bool allowd_place(node* place)
 {
     if (place!=NULL && place->type!=3 && place->empty==true)
         return true;
+    /*if (place==NULL)
+        printf("NULL\n");
+    else if (place->type==3)
+        printf("forbidden\n");
+    else if (place->empty==false)
+        printf("taken\n");*/
     return false;
 }
 
@@ -363,7 +373,7 @@ void print_cells(cell* head)
     int i=1;
     while(head!=NULL)
     {
-        printf("%d) %s (%d, %d)\n",i,head->name,(head->location)->position.x,(head->location)->position.y);
+        printf("%d) %s (%d, %d)\t %d\n",i,head->name,(head->location)->position.x,(head->location)->position.y,head->energy);
         head=head->next;
         i++;
     }
@@ -389,9 +399,11 @@ void split_cell(cell** headhead,int th)
     int dir;
     cell* head=*headhead;
     cell* current_c=find_cell(head,th);
+    if (current_c==NULL)
+        return NULL;
     node* current_n=current_c->location;
     dir=rand_adj(current_n);
-    if (current_n->type!=4 || !dir )//(|| current_c->energy>=80) vaghti energy ro dorost kardi
+    if (current_n->type!=2 || !dir || current_c->energy<80)//(|| current_c->energy<80)
     {
         printf("Can't be done\n");
         return NULL;
@@ -424,6 +436,58 @@ void split_cell(cell** headhead,int th)
         current_c=current_c->next;
     current_c->next=new_cell1;
     new_cell1->next=new_cell2;
-    delete_cell(headhead,th);   
+    delete_cell(headhead,th);
+    printf("split completed\n");   
 }
 
+void gain_energy(cell* head,int th)
+{
+    cell* current=find_cell(head,th);
+    if (current==NULL)
+        return NULL;
+    int need=100-(current->energy);
+    int left=(current->location)->source;
+    if ((current->location)->type!=1)
+    {
+        printf("it is not a source cell\n");
+        return NULL;
+    }
+    else if (need==0){
+        printf("full energy!\n");
+        return NULL;
+    }
+    else if (left==0)
+    {
+        printf("no energy left here\n");
+        return NULL;
+    }
+    else if (left<15 && need <15)
+    {
+        if (left>=need)
+        {
+            current->energy=100;
+            (current->location)->source-=need;
+        }
+        else
+        {
+            current->energy+=left;
+            (current->location)->source=0;
+        }
+    }
+    else if (left>=15 && need<15)
+    {
+        current->energy=100;
+        (current->location)->source-=need;
+    }
+    else if (left<15 && need>=15)
+    {
+        current->energy+=left;
+        (current->location)->source=0;
+    }
+    else 
+    {
+        current->energy+=15;
+        (current->location)->source-=15;
+    }
+    printf("successfull boost\n");
+}

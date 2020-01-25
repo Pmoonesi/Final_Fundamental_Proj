@@ -27,9 +27,9 @@ int main()
     scanf("%d",&c);
     cell* cell_head=create_cell(c,n,head);
 
-    while (loop)
+    /*while (loop)
     {
-        printf("[1]move cell\n[2]split cell\n[3]exit\n");
+        printf("[1]move cell\n[2]split cell\n[3]boost energy\n[4]exit\n");
         scanf("%d",&i);
         if (i==1)
         {
@@ -48,6 +48,39 @@ int main()
             split_cell(&cell_head,p);
         }
         else if (i==3)
+        {
+            printf("which one of the following cells ?\n");
+            print_cells(cell_head);
+            scanf("%d",&p);
+            gain_energy(cell_head,p);
+        }
+        else if (i==4)
+            loop=false;
+        else 
+            printf("invalid input\n");
+    }*/
+    while (loop)
+    {
+        printf("which one of the following cells ?\n");
+        print_cells(cell_head);
+        scanf("%d",&p);
+        printf("[1]move cell\n[2]split cell\n[3]boost energy\n[4]exit\n");
+        scanf("%d",&i);
+        if (i==1)
+        {
+            printf("in which direction ?\n[1]North\n[2]South\n[3]Northeast\n[4]Northwest\n[5]Southeast\n[6]Southwest\n");
+            scanf("%d",&j);
+            cell_move(cell_head,p,j);
+        }
+        else if (i==2)
+        {
+            split_cell(&cell_head,p);
+        }
+        else if (i==3)
+        {
+            gain_energy(cell_head,p);
+        }
+        else if (i==4)
             loop=false;
         else 
             printf("invalid input\n");
