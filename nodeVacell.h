@@ -3,10 +3,10 @@
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
-
-typedef struct{
-    int x,y;
-}point;
+#include "map_editor.h"
+// typedef struct{
+//     int x,y;
+// }point;
 
 typedef struct{
     int type;
@@ -490,4 +490,15 @@ void gain_energy(cell* head,int th)
         (current->location)->source-=15;
     }
     printf("successfull boost\n");
+}
+
+int cell_count(cell* cell_head)
+{
+    int res=0;
+    while(cell_head!=NULL)
+    {
+        cell_head=cell_head->next;
+        res++;
+    }
+    return res;
 }

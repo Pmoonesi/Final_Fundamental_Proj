@@ -132,3 +132,13 @@ void map_editor(void)
     
 }
 
+int source_count(int **ma_p,int size)
+{
+    int i,j,res;
+    for (i=0;i<size;i++)
+        for (j=0;j<size;j++)
+            if (ma_p[i][j]==1)
+                res++;
+    return res;
+}
+
