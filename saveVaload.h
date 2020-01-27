@@ -8,34 +8,33 @@
 
 char* now()
 {
-    char* buff=malloc(25*sizeof(char));
+    char* buff;
+    buff=(char*)malloc(25*sizeof(char));
     time_t t=time(NULL);
     struct tm tm= *localtime(&t);
     sprintf(buff,"now: %d-%02d-%02d %02d:%02d:%02d\0",tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
     return buff;
 }
 
-void save_game(node* head_node,cell* head_cell1,cell*head_cell2,char* map_name,int** ma_p,int size)
+void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int size)
 {
     FILE* fp;
     if (head_cell2==NULL)
-        fp=fopen("single_player_save.bin","wb");//append beshe
+        fp=fopen("single_player_save.bin","w+b");//append beshe
     else
-        fp=fopen("multi_player_save.bin","wb");//append beshe
+        fp=fopen("multi_player_save.bin","w+b");//append beshe
     node* temp;
     point pt;
     char date[25],t_name[8];
-    
+
     int s_count,i,j,temp_s,dum,c_count,temp_e;
     strcpy(date,now());
-    fwrite(date,sizeof(char),25,fp);
-    dum=strlen(map_name)+1;
-    fwrite(&dum,sizeof(int),1,fp);
-    fwrite(map_name,sizeof(char),dum,fp);
+    fwrite(date,sizeof(char),25,fp);        //inja mishe esme map moteghayer bashe
+    //fwrite("map.bin",sizeof(char),8,fp);
     s_count=source_count(ma_p,size);
     fwrite(&s_count,sizeof(int),1,fp);
-    for (i=0;i<size;i++)
-        for(j=0;j<size;j++)
+    for (i=0;i<size;i++){
+        for(j=0;j<size;j++){
             if (ma_p[i][j]==1)
             {
                 dum=size-i-1;
@@ -47,6 +46,8 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,char* map_name,i
                 temp_s=temp->source;
                 fwrite(&temp_s,sizeof(int),1,fp);
             }
+        }
+    }
     c_count=cell_count(head_cell1);
     fwrite(&c_count,sizeof(int),1,fp);
     while(head_cell1!=NULL)
@@ -67,7 +68,7 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,char* map_name,i
     if (head_cell2==NULL)
     {
         fclose(fp);
-        return NULL;
+        return ;
     }
     c_count=cell_count(head_cell2);
     fwrite(&c_count,sizeof(int),1,fp);
@@ -86,6 +87,7 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,char* map_name,i
         fwrite(t_name,sizeof(char),8,fp);
         head_cell2=head_cell2->next;
     }
+    fclose(fp);
 }
 
 void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int som)
@@ -94,21 +96,27 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     //inja bayad tori she ke bege chandomin save ro biare
     FILE* sp;
     if (som==1)
-        sp=fopen("single_player_save.bin","rb");
+        sp=fopen("single_player_save.bin","r+b");
     else
-        sp=fopen("multi_player_save.bin","rb");
+        sp=fopen("multi_player_save.bin","r+b");
+    if (sp==NULL){
+        printf("couldn't open saved files\n");
+        exit(-1);
+    }
+
     char date[25],*map_name,*cell_name;
     int c_size,size,s_count,i,j,temp_s,c_count,temp_e;
     point pt;
     node* temp;
     fread(date,sizeof(char),25,sp);
-    fread(&c_size,sizeof(int),1,sp);
-    map_name=(char*)calloc(c_size,sizeof(char));
-    fread(map_name,sizeof(char),c_size,sp);
-    FILE* fp=fopen(map_name,"rb");
+    FILE* fp=fopen("map.bin","r+b");         //map mitoone moteghayer bashe
+    if (fp==NULL){
+        exit(-1);
+    }
+
     fread(&size,sizeof(int),1,fp);
     *ma_p=read_file(fp);
-    //fclose(fp);
+    fclose(fp);
     *head_node=make_network(*ma_p,size);
     fread(&s_count,sizeof(int),1,sp);
     while (s_count>0)
@@ -123,7 +131,8 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
         s_count--;
     }
     fread(&c_count,sizeof(int),1,sp);
-    cell* ch=malloc(sizeof(cell));
+    cell* ch;
+    ch=(cell*)malloc(sizeof(cell));
     ch->name=(char*)malloc(8*sizeof(char));
     fread(&j,sizeof(int),1,sp);
     fread(&i,sizeof(int),1,sp);
@@ -140,7 +149,8 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     cell* cc=ch;
     while(c_count>0)
     {
-        cell* nc=malloc(sizeof(cell));
+        cell* nc;
+        nc=(cell*)malloc(sizeof(cell));
         nc->name=(char*)malloc(8*sizeof(char));
         fread(&j,sizeof(int),1,sp);
         fread(&i,sizeof(int),1,sp);
@@ -159,7 +169,7 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     }
     *head_cell1=ch;
     if (som==1)
-        return NULL;
+        return ;
     fread(&c_count,sizeof(int),1,sp);
     ch=(cell*)calloc(1,sizeof(cell));
     ch->name=(char*)calloc(8,sizeof(char));
@@ -178,7 +188,8 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     cc=ch;
     while(c_count>0)
     {
-        cell* nc=malloc(sizeof(cell));
+        cell* nc;
+        nc=(cell*)malloc(sizeof(cell));
         nc->name=(char*)malloc(8*sizeof(char));
         fread(&j,sizeof(int),1,sp);
         fread(&i,sizeof(int),1,sp);

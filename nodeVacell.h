@@ -8,7 +8,7 @@
 //     int x,y;
 // }point;
 
-typedef struct{
+struct node{
     int type;
     point position;
     int source;
@@ -19,7 +19,9 @@ typedef struct{
     struct node* south;
     struct node* south_east;
     struct node* south_west;
-} node;
+};
+
+typedef struct node node;
 
 node* create_node(int n,int xx,int yy)
 {
@@ -119,7 +121,8 @@ int name_search(char* name,FILE* fp)
 {
     FILE *ftemp=fp;
     fseek(ftemp,0,SEEK_SET);
-    char* temp=malloc(8*sizeof(char));
+    char* temp;
+    temp=(char*)malloc(8*sizeof(char));
     while(1)
     {
         fread(temp,sizeof(char),8,ftemp);
@@ -143,7 +146,7 @@ char* rand_name(void)
     }
     srand(time(0));
     char *name,c[2];
-    int i,type;    
+    int i,type;
     c[1]='\0';
     do
     {
@@ -168,12 +171,14 @@ char* rand_name(void)
     return name;
 }
 
-typedef struct{
+struct cell{
     node* location;
     int energy;
     char* name;
     struct cell* next;
-}cell;
+};
+
+typedef struct cell cell;
 
 node* find_node(point p,node* head)
 {
@@ -198,7 +203,8 @@ cell* create_cell(int in_num,int size,node* head)
     int i;
     srand(time(0));
     point p;
-    cell* cell_head = malloc (sizeof(cell)),*current;
+    cell* cell_head,*current;
+    cell_head=(cell*) malloc (sizeof(cell));
     if (cell_head==NULL)
     {
         printf("problem with malloc\n");
@@ -209,7 +215,7 @@ cell* create_cell(int in_num,int size,node* head)
     cell_head->name=rand_name();
     cell_head->next=NULL;
     cell_head->location=NULL;
-    
+
     while(cell_head->location==NULL)
     {
         p.x=rand()%size;
@@ -220,7 +226,8 @@ cell* create_cell(int in_num,int size,node* head)
     current=cell_head;
     for (i=1;i<in_num;i++)
     {
-        cell* new_cell=malloc(sizeof(cell));
+        cell* new_cell;
+        new_cell=(cell*)malloc(sizeof(cell));
         if (new_cell==NULL)
         {
             printf("problem with malloc\n");
@@ -231,7 +238,7 @@ cell* create_cell(int in_num,int size,node* head)
         new_cell->name=rand_name();
         new_cell->next=NULL;
         new_cell->location=NULL;
-        
+
         while(new_cell->location==NULL)
         {
             p.x=rand()%size;        //bayad chek koni ke position esh tekrari nashe !
@@ -274,11 +281,11 @@ bool allowd_place(node* place)
 }
 
 int rand_adj (node* place)
-{    
+{
     int res=0,i;
     char c[2],*adj;
     c[1]='\0';
-    
+
     adj=(char*)calloc(7,sizeof(char));
     if(allowd_place(place->north)==1)
     {
@@ -321,7 +328,7 @@ void cell_move(cell* head,int th,int direction)
 {
     cell* current=find_cell(head,th);
     if (current==NULL){
-        return NULL;
+        return ;
     }
     node* place=current->location;
     switch(direction)
@@ -352,11 +359,11 @@ void cell_move(cell* head,int th,int direction)
         }
         default:{
             printf("wrong input\n");
-            return NULL;
+            return ;
             break;
         }
     }
-    if (allowd_place(place)){ 
+    if (allowd_place(place)){
         (current->location)->empty=true;
         current->location=place;
         (current->location)->empty=false;
@@ -400,15 +407,17 @@ void split_cell(cell** headhead,int th)
     cell* head=*headhead;
     cell* current_c=find_cell(head,th);
     if (current_c==NULL)
-        return NULL;
+        return ;
     node* current_n=current_c->location;
     dir=rand_adj(current_n);
     if (current_n->type!=2 || !dir || current_c->energy<80)//(|| current_c->energy<80)
     {
         printf("Can't be done\n");
-        return NULL;
+        return ;
     }
-    cell* new_cell1 = malloc (sizeof(cell)),*new_cell2=malloc(sizeof(cell));
+    cell* new_cell1,*new_cell2;
+    new_cell1=(cell*)malloc(sizeof(cell));
+    new_cell2=(cell*)malloc(sizeof(cell));
     if (new_cell1==NULL)
     {
         printf("problem with malloc\n");
@@ -437,29 +446,29 @@ void split_cell(cell** headhead,int th)
     current_c->next=new_cell1;
     new_cell1->next=new_cell2;
     delete_cell(headhead,th);
-    printf("split completed\n");   
+    printf("split completed\n");
 }
 
 void gain_energy(cell* head,int th)
 {
     cell* current=find_cell(head,th);
     if (current==NULL)
-        return NULL;
+        return ;
     int need=100-(current->energy);
     int left=(current->location)->source;
     if ((current->location)->type!=1)
     {
         printf("it is not a source cell\n");
-        return NULL;
+        return ;
     }
     else if (need==0){
         printf("full energy!\n");
-        return NULL;
+        return ;
     }
     else if (left==0)
     {
         printf("no energy left here\n");
-        return NULL;
+        return ;
     }
     else if (left<15 && need <15)
     {
@@ -484,7 +493,7 @@ void gain_energy(cell* head,int th)
         current->energy+=left;
         (current->location)->source=0;
     }
-    else 
+    else
     {
         current->energy+=15;
         (current->location)->source-=15;

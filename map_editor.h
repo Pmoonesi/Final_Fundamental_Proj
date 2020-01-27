@@ -25,7 +25,8 @@ int** read_file (FILE* fporig)
     char c;
     int n,i;
     fread(&n,sizeof(int),1,fp);
-    int **arr=malloc(n*sizeof(int*));
+    int **arr;
+    arr=(int**)malloc(n*sizeof(int*));
     /*for (i=0;i<n;i++)
         arr[i]=(int*)malloc(n*sizeof(int));*/
     for (i=0;i<n*n;i++)
@@ -33,7 +34,6 @@ int** read_file (FILE* fporig)
         if (i%n==0)
             arr[i/n]=(int*)malloc(n*sizeof(int));
         fread(&c,sizeof(char),1,fp);
-        //if (c=="Energy"){do something for its amount}
         arr[i/n][i%n]=c-'0';
     }
     return arr;
@@ -62,7 +62,7 @@ void prnt_menu()
 void map_editor(void)
 {
     int act;
-    
+
     do
     {
         prnt_menu();
@@ -76,7 +76,7 @@ void map_editor(void)
             scanf("%s",fn);
 
             FILE *fp=fopen(fn,"wb");
-            
+
             printf("Number of R&C : ");
             scanf("%d",&n);
             getchar();
@@ -124,21 +124,23 @@ void map_editor(void)
             }
             write_file(fp,arr,n);
             fclose(fp);
-            
+
         }
         else if( act!=3)
             printf("Invalid num ! enter again \n");
     } while (act!=3);     //mitooni ye show map ham bezari !
-    
+
 }
 
 int source_count(int **ma_p,int size)
 {
-    int i,j,res;
-    for (i=0;i<size;i++)
-        for (j=0;j<size;j++)
+    int i,j,res=0;
+    for (i=0;i<size;i++){
+        for (j=0;j<size;j++){
             if (ma_p[i][j]==1)
                 res++;
+        }
+    }
     return res;
 }
 
