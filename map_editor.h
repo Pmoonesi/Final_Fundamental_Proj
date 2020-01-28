@@ -27,12 +27,12 @@ int** read_file (FILE* fporig)
     fread(&n,sizeof(int),1,fp);
     int **arr;
     arr=(int**)malloc(n*sizeof(int*));
-    /*for (i=0;i<n;i++)
-        arr[i]=(int*)malloc(n*sizeof(int));*/
+    for (i=0;i<n;i++)
+        arr[i]=(int*)malloc(n*sizeof(int));
     for (i=0;i<n*n;i++)
     {
-        if (i%n==0)
-            arr[i/n]=(int*)malloc(n*sizeof(int));
+        /*if (i%n==0)
+            arr[i/n]=(int*)malloc(n*sizeof(int));*/
         fread(&c,sizeof(char),1,fp);
         arr[i/n][i%n]=c-'0';
     }

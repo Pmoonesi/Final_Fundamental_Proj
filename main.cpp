@@ -21,21 +21,7 @@ point whereitat(point pos)
     return res;
 }
 
-/*void draw_map(int** ma_p,int size)
-{
-    for (int i=0;i<size;i++)
-    {
-        if (i%2==1)
-                AazMabda+=r;
-            else
-                AazMabda-=r;
-        for (int j=0;j<size;j++)
-        {
-            setfillstyle(8,clr[ma_p[j][i]-1]);
-            fillellipse(TazMabda+i*r*sqrt(3),AazMabda+2*r*j,r,r);
-        }
-    }
-}*/
+
 
 void draw_map(int** ma_p,int size)
 {
@@ -48,13 +34,18 @@ void draw_map(int** ma_p,int size)
             temp=whereitat(temp);
             setfillstyle(8,clr[ma_p[j][i]-1]);
             fillellipse(temp.x,temp.y,r,r);
+            setfillstyle(1,BLACK);
         }
     }
 }
 
-void show_cells(cell* cell_head1,int size,int player)
+void show_cells(cell* cell_head1,cell* cell_head2,int size,int player)
 {
-    int cell_r;
+    int cell_r,t;
+    if (player==2)
+        t=1;
+    else
+        t=2;
     const int color[2]={0,15};
     point temp;
     while(cell_head1!=NULL)
@@ -63,25 +54,43 @@ void show_cells(cell* cell_head1,int size,int player)
         cell_r=(r*3/5.0)*(cell_head1->energy/100.0)+r*(1/5.0);
         temp.y=size-temp.y-1;
         temp=whereitat(temp);
-        setfillstyle(2,color[player-1]);
+        setfillstyle(1,color[player-1]);
         fillellipse(temp.x,temp.y,cell_r,cell_r);
         cell_head1=cell_head1->next;
+    }
+    if (cell_head2==NULL)
+        return ;
+    while(cell_head2!=NULL)
+    {
+        temp=(cell_head2->location)->position;
+        cell_r=(r*3/5.0)*(cell_head2->energy/100.0)+r*(1/5.0);
+        temp.y=size-temp.y-1;
+        temp=whereitat(temp);
+
+        setfillstyle(1,color[t-1]);
+        fillellipse(temp.x,temp.y,cell_r,cell_r);
+        cell_head2=cell_head2->next;
     }
 }
 
 void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int size,int player,bool* loop)
 {
-    initwindow(800,800);
+    //initwindow(800,800);
     //setfillstyle(0,0);
+    setfillstyle(1,BLACK);
     bar(0,0,800,800);
     printf("PLAYER%d 's turn\n",player);
     int p,i,j;
     //show_map(ma_p,size);
     draw_map(ma_p,size);
-    show_cells(*cell_head1,size,player);
+    show_cells(*cell_head1,*cell_head2,size,player);
     printf("which one of the following cells ?\n");
     print_cells(*cell_head1);
     scanf("%d",&p);
+    if (find_cell(*cell_head1,p)==NULL){
+        return ;
+    }
+
     printf("[1]move cell\n[2]split cell\n[3]boost energy\n[4]save\n[5]exit\n");
     scanf("%d",&i);
     if (i==1)
@@ -107,17 +116,17 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
     }
     else if (i==5){
         *loop=false;
+        closegraph();
     }
     else
         printf("invalid input\n");
-    closegraph();
+    //closegraph();
 }
 
 int main()
 {
     srand(time(0));
     bool outloop=true;
-    //initwindow(800,800);
     while(outloop){
         bool loop=true;
         int size,cell_num;
@@ -133,7 +142,7 @@ int main()
         {
             printf("[1]single player save\n[2]multiplayer save\n");
             scanf("%d",&num_players);
-            load_game(&head,&cell_head1,&cell_head2,&ma_p,num_players);
+            load_game(&head,&cell_head1,&cell_head2,&ma_p,&size,num_players);
         }
         else if (choice==2)
         {
@@ -165,6 +174,13 @@ int main()
             loop=false;
             outloop=false;
         }
+
+        initwindow(800,800);
+        setfillstyle(1,BLACK);
+        bar(0,0,800,800);
+        /*show_cells(cell_head1,size,1);
+        if (cell_head2!=NULL)
+            show_cells(cell_head2,size,1);*/
         while (loop)
         {
             play_that(&head,&cell_head1,&cell_head2,ma_p,size,1,&loop);

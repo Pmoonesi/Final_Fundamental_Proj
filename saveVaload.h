@@ -42,7 +42,7 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int s
                 fwrite(&dum,sizeof(int),1,fp);
                 pt.x=j;
                 pt.y=dum;
-                temp=find_node(pt,head_node);
+                temp=find_node_sp(pt,head_node);
                 temp_s=temp->source;
                 fwrite(&temp_s,sizeof(int),1,fp);
             }
@@ -90,7 +90,7 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int s
     fclose(fp);
 }
 
-void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int som)
+void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int* size,int som)
 {
     //inja bayad onvane save haro baraye karbar biare
     //inja bayad tori she ke bege chandomin save ro biare
@@ -105,7 +105,7 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     }
 
     char date[25],*map_name,*cell_name;
-    int c_size,size,s_count,i,j,temp_s,c_count,temp_e;
+    int c_size,s_count,i,j,temp_s,c_count,temp_e;
     point pt;
     node* temp;
     fread(date,sizeof(char),25,sp);
@@ -114,10 +114,10 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
         exit(-1);
     }
 
-    fread(&size,sizeof(int),1,fp);
+    fread(size,sizeof(int),1,fp);
     *ma_p=read_file(fp);
     fclose(fp);
-    *head_node=make_network(*ma_p,size);
+    *head_node=make_network(*ma_p,*size);
     fread(&s_count,sizeof(int),1,sp);
     while (s_count>0)
     {

@@ -198,6 +198,22 @@ node* find_node(point p,node* head)
     return current;
 }
 
+node* find_node_sp(point p,node* head) //copy tabe bala faghat baraye save ok shode
+{
+    node* current=head;
+    int i;
+    for (i=0;i<p.y;i++)
+        current=current->north;
+    for (i=0;i<p.x;i++)
+    {
+        if (i%2==0)
+            current=current->south_east;
+        else
+            current=current->north_east;
+    }
+    return current;
+}
+
 cell* create_cell(int in_num,int size,node* head)
 {
     int i;
