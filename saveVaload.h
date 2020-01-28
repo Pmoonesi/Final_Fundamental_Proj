@@ -16,13 +16,19 @@ char* now()
     return buff;
 }
 
-void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int size)
+void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int size,char* map_name)
 {
-    FILE* fp;
+    char savename[50];
+    printf("name of save ? : ");
+    scanf("%s",savename);
+    FILE* fyle;
     if (head_cell2==NULL)
-        fp=fopen("single_player_save.bin","w+b");//append beshe
+        fyle=fopen("single_player_saves.txt","a+");//append beshe
     else
-        fp=fopen("multi_player_save.bin","w+b");//append beshe
+        fyle=fopen("multiplayer_saves.txt","a+");//append beshe
+    fprintf(fyle,"%s %s\n",savename,map_name);
+    fclose(fyle);
+    FILE* fp=fopen(savename,"w+b");
     node* temp;
     point pt;
     char date[25],t_name[8];
@@ -90,26 +96,62 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int s
     fclose(fp);
 }
 
-void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int* size,int som)
+FILE* choosesave (int som,FILE** mp,char** map_name)
 {
-    //inja bayad onvane save haro baraye karbar biare
-    //inja bayad tori she ke bege chandomin save ro biare
-    FILE* sp;
+    int i=1,n;
+    FILE* fyle;
+    char loadname[50],mapname[20];
     if (som==1)
-        sp=fopen("single_player_save.bin","r+b");
+        fyle=fopen("single_player_saves.txt","r");
     else
-        sp=fopen("multi_player_save.bin","r+b");
+        fyle=fopen("multiplayer_saves.txt","r");
+    while(1)
+    {
+        fscanf(fyle,"%s",loadname);
+        fscanf(fyle,"%s",mapname);
+        printf("%d) %s\t%s\n",i,loadname,mapname);
+        i++;
+        if (feof(fyle))
+            break;
+    }
+    fseek(fyle,0,SEEK_SET);
+    scanf("%d",&n);
+    if (n>i){
+        printf("out of range\n");
+        *mp=NULL;
+        return NULL;
+    }
+    for (i=0;i<n;i++)
+    {
+        fscanf(fyle,"%s",loadname);
+        fscanf(fyle,"%s",mapname);
+    }
+    strcpy(*map_name,mapname);
+    //printf("%s it is\n",mapname);
+    *mp=fopen(mapname,"r+b");
+    if (*mp==NULL)
+        printf("map could not be opened!\n");
+    FILE* fp=fopen(loadname,"r+b");
+    if (fp==NULL)
+        printf("save couldn't be opened!\n");
+    return fp;
+}
+
+void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int* size,int som,char** map_name)
+{
+    FILE* fp,*sp;
+    sp=choosesave(som,&fp,map_name);
+
     if (sp==NULL){
         printf("couldn't open saved files\n");
         exit(-1);
     }
 
-    char date[25],*map_name,*cell_name;
+    char date[25],*cell_name;
     int c_size,s_count,i,j,temp_s,c_count,temp_e;
     point pt;
     node* temp;
-    fread(date,sizeof(char),25,sp);
-    FILE* fp=fopen("map.bin","r+b");         //map mitoone moteghayer bashe
+    fread(date,sizeof(char),25,sp);         //map mitoone moteghayer bashe
     if (fp==NULL){
         exit(-1);
     }

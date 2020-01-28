@@ -129,6 +129,40 @@ void map_editor(void)
         else if( act!=3)
             printf("Invalid num ! enter again \n");
     } while (act!=3);     //mitooni ye show map ham bezari !
+}
+
+FILE* map_opener(char** map_name)
+{
+    int i=1,n;
+    FILE* fyle=fopen("maps.txt","r");
+    char mapname[20];
+    printf("which one of the following maps would you want ? \n");
+    while(1)
+    {
+        fscanf(fyle,"%s",mapname);
+        printf("%d) %s\n",i,mapname);
+        i++;
+        if (feof(fyle))
+            break;
+    }
+    fseek(fyle,0,SEEK_SET);
+    scanf("%d",&n);
+    if (n>i){
+        printf("out of range\n");
+        *map_name=NULL;
+        return NULL;
+    }
+    for (i=0;i<n;i++)
+    {
+        fscanf(fyle,"%s",mapname);
+    }
+    printf("%s it is\n",mapname);
+    strcpy(*map_name,mapname);
+    FILE* fp=fopen(mapname,"rb");
+    if (fp==NULL)
+        printf("couldn't be opened!\n");
+
+    return fp;
 
 }
 

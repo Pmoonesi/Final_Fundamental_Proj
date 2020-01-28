@@ -73,7 +73,7 @@ void show_cells(cell* cell_head1,cell* cell_head2,int size,int player)
     }
 }
 
-void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int size,int player,bool* loop)
+void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int size,int player,bool* loop,char* map_name)
 {
     //initwindow(800,800);
     //setfillstyle(0,0);
@@ -110,9 +110,9 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
     else if (i==4)
     {
         if (player==1)
-            save_game(*head,*cell_head1,*cell_head2,ma_p,size);
+            save_game(*head,*cell_head1,*cell_head2,ma_p,size,map_name);
         else
-            save_game(*head,*cell_head2,*cell_head1,ma_p,size);
+            save_game(*head,*cell_head2,*cell_head1,ma_p,size,map_name);
     }
     else if (i==5){
         *loop=false;
@@ -130,9 +130,10 @@ int main()
     while(outloop){
         bool loop=true;
         int size,cell_num;
-
+        char* map_name;
+        map_name=(char*)malloc(20*sizeof(char));
         int choice,num_players;
-        printf("[1]Load\n[2]New single player game\n[3]New multiplayer game\n[4]Exit\n");
+        printf("[1]Load\n[2]New single player game\n[3]New multiplayer game\n[4]map editor\n[5]Exit\n");
         scanf("%d",&choice);
         int **ma_p;
         cell *cell_head1=NULL;
@@ -142,11 +143,12 @@ int main()
         {
             printf("[1]single player save\n[2]multiplayer save\n");
             scanf("%d",&num_players);
-            load_game(&head,&cell_head1,&cell_head2,&ma_p,&size,num_players);
+            load_game(&head,&cell_head1,&cell_head2,&ma_p,&size,num_players,&map_name);
         }
         else if (choice==2)
         {
-            FILE* fp=fopen("map.bin","rb");
+            FILE* fp;
+            fp=map_opener(&map_name);
             fread(&size,sizeof(int),1,fp);
             ma_p=read_file(fp);
             fclose(fp);
@@ -157,7 +159,8 @@ int main()
         }
         else if (choice==3)
         {
-            FILE* fp=fopen("map.bin","rb");
+            FILE* fp;
+            fp=map_opener(&map_name);
             fread(&size,sizeof(int),1,fp);
             ma_p=read_file(fp);
             fclose(fp);
@@ -171,6 +174,11 @@ int main()
         }
         else if (choice==4)
         {
+            map_editor();
+            continue;
+        }
+        else if (choice==5)
+        {
             loop=false;
             outloop=false;
         }
@@ -183,11 +191,11 @@ int main()
             show_cells(cell_head2,size,1);*/
         while (loop)
         {
-            play_that(&head,&cell_head1,&cell_head2,ma_p,size,1,&loop);
+            play_that(&head,&cell_head1,&cell_head2,ma_p,size,1,&loop,map_name);
             if (loop==false)
                 break;
             if(cell_head2!=NULL)
-                play_that(&head,&cell_head2,&cell_head1,ma_p,size,2,&loop);
+                play_that(&head,&cell_head2,&cell_head1,ma_p,size,2,&loop,map_name);
         }
     }
     closegraph();
