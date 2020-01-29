@@ -4,9 +4,6 @@
 #include <time.h>
 #include <stdbool.h>
 #include "map_editor.h"
-// typedef struct{
-//     int x,y;
-// }point;
 
 struct node{
     int type;

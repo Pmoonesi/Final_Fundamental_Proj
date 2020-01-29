@@ -21,8 +21,6 @@ point whereitat(point pos)
     return res;
 }
 
-
-
 void draw_map(int** ma_p,int size)
 {
     point temp;
@@ -34,7 +32,6 @@ void draw_map(int** ma_p,int size)
             temp=whereitat(temp);
             setfillstyle(8,clr[ma_p[j][i]-1]);
             fillellipse(temp.x,temp.y,r,r);
-            setfillstyle(1,BLACK);
         }
     }
 }
@@ -66,7 +63,6 @@ void show_cells(cell* cell_head1,cell* cell_head2,int size,int player)
         cell_r=(r*3/5.0)*(cell_head2->energy/100.0)+r*(1/5.0);
         temp.y=size-temp.y-1;
         temp=whereitat(temp);
-
         setfillstyle(1,color[t-1]);
         fillellipse(temp.x,temp.y,cell_r,cell_r);
         cell_head2=cell_head2->next;
@@ -75,8 +71,6 @@ void show_cells(cell* cell_head1,cell* cell_head2,int size,int player)
 
 void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int size,int player,bool* loop,char* map_name)
 {
-    //initwindow(800,800);
-    //setfillstyle(0,0);
     setfillstyle(1,BLACK);
     bar(0,0,800,800);
     printf("PLAYER%d 's turn\n",player);
@@ -90,7 +84,6 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
     if (find_cell(*cell_head1,p)==NULL){
         return ;
     }
-
     printf("[1]move cell\n[2]split cell\n[3]boost energy\n[4]save\n[5]exit\n");
     scanf("%d",&i);
     if (i==1)
@@ -120,7 +113,6 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
     }
     else
         printf("invalid input\n");
-    //closegraph();
 }
 
 int main()
@@ -144,6 +136,8 @@ int main()
             printf("[1]single player save\n[2]multiplayer save\n");
             scanf("%d",&num_players);
             load_game(&head,&cell_head1,&cell_head2,&ma_p,&size,num_players,&map_name);
+            if (map_name==NULL)
+                continue;
         }
         else if (choice==2)
         {
@@ -182,13 +176,9 @@ int main()
             loop=false;
             outloop=false;
         }
-
         initwindow(800,800);
         setfillstyle(1,BLACK);
         bar(0,0,800,800);
-        /*show_cells(cell_head1,size,1);
-        if (cell_head2!=NULL)
-            show_cells(cell_head2,size,1);*/
         while (loop)
         {
             play_that(&head,&cell_head1,&cell_head2,ma_p,size,1,&loop,map_name);
@@ -198,6 +188,5 @@ int main()
                 play_that(&head,&cell_head2,&cell_head1,ma_p,size,2,&loop,map_name);
         }
     }
-    closegraph();
     return 0;
 }

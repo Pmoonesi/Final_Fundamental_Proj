@@ -19,24 +19,22 @@ char* now()
 void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int size,char* map_name)
 {
     char savename[50];
-    printf("name of save ? : ");
+    printf("name of save ? : (.bin) ");
     scanf("%s",savename);
     FILE* fyle;
     if (head_cell2==NULL)
-        fyle=fopen("single_player_saves.txt","a+");//append beshe
+        fyle=fopen("single_player_saves.txt","a+");
     else
-        fyle=fopen("multiplayer_saves.txt","a+");//append beshe
-    fprintf(fyle,"%s %s\n",savename,map_name);
+        fyle=fopen("multiplayer_saves.txt","a+");
+    fprintf(fyle,"%s %s\n",tobin(savename),map_name);
     fclose(fyle);
-    FILE* fp=fopen(savename,"w+b");
+    FILE* fp=fopen(tosavesfolder(tobin(savename)),"w+b");
     node* temp;
     point pt;
     char date[25],t_name[8];
-
     int s_count,i,j,temp_s,dum,c_count,temp_e;
     strcpy(date,now());
-    fwrite(date,sizeof(char),25,fp);        //inja mishe esme map moteghayer bashe
-    //fwrite("map.bin",sizeof(char),8,fp);
+    fwrite(date,sizeof(char),25,fp);
     s_count=source_count(ma_p,size);
     fwrite(&s_count,sizeof(int),1,fp);
     for (i=0;i<size;i++){
@@ -60,8 +58,7 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int s
     {
         pt=(head_cell1->location)->position;
         temp_e=head_cell1->energy;
-        //t_name=(char*)calloc(8,sizeof(char));
-        //t_name=head_cell1->name;
+
         i=pt.y;
         j=pt.x;
         fwrite(&j,sizeof(int),1,fp);
@@ -82,8 +79,6 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int s
     {
         pt=(head_cell2->location)->position;
         temp_e=head_cell2->energy;
-        //t_name=(char*)calloc(8,sizeof(char));
-        //t_name=head_cell1->name;
         i=pt.y;
         j=pt.x;
         fwrite(&j,sizeof(int),1,fp);
@@ -107,31 +102,34 @@ FILE* choosesave (int som,FILE** mp,char** map_name)
         fyle=fopen("multiplayer_saves.txt","r");
     while(1)
     {
-        fscanf(fyle,"%s",loadname);
-        fscanf(fyle,"%s",mapname);
-        printf("%d) %s\t%s\n",i,loadname,mapname);
-        i++;
         if (feof(fyle))
             break;
+        fscanf(fyle,"%s",loadname);
+        fscanf(fyle,"%s",mapname);
+        if (feof(fyle))
+            break;
+        printf("%d) %s\t%s\n",i,toraw(loadname),toraw(mapname));
+        i++;
+
     }
-    fseek(fyle,0,SEEK_SET);
     scanf("%d",&n);
-    if (n>i){
+    if (n>=i){
         printf("out of range\n");
+        *map_name=NULL;
         *mp=NULL;
         return NULL;
     }
+    fseek(fyle,0,SEEK_SET);
     for (i=0;i<n;i++)
     {
         fscanf(fyle,"%s",loadname);
         fscanf(fyle,"%s",mapname);
     }
     strcpy(*map_name,mapname);
-    //printf("%s it is\n",mapname);
-    *mp=fopen(mapname,"r+b");
+    *mp=fopen(tomapsfolder(mapname),"r+b");
     if (*mp==NULL)
         printf("map could not be opened!\n");
-    FILE* fp=fopen(loadname,"r+b");
+    FILE* fp=fopen(tosavesfolder(loadname),"r+b");
     if (fp==NULL)
         printf("save couldn't be opened!\n");
     return fp;
@@ -143,17 +141,17 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     sp=choosesave(som,&fp,map_name);
 
     if (sp==NULL){
-        printf("couldn't open saved files\n");
-        exit(-1);
+        printf("couldn't open saved file\n");
+        return ;
     }
 
     char date[25],*cell_name;
     int c_size,s_count,i,j,temp_s,c_count,temp_e;
     point pt;
     node* temp;
-    fread(date,sizeof(char),25,sp);         //map mitoone moteghayer bashe
+    fread(date,sizeof(char),25,sp);
     if (fp==NULL){
-        exit(-1);
+        return ;
     }
 
     fread(size,sizeof(int),1,fp);
@@ -179,7 +177,7 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     fread(&j,sizeof(int),1,sp);
     fread(&i,sizeof(int),1,sp);
     pt.x=j;
-    pt.y=i;             //chon ke moghe ye zakhire in daghighan location e cell e na jash rooye map
+    pt.y=i;
     fread(&temp_e,sizeof(int),1,sp);
     cell_name=(char*)calloc(8,sizeof(char));
     fread(cell_name,sizeof(char),8,sp);
@@ -218,7 +216,7 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     fread(&j,sizeof(int),1,sp);
     fread(&i,sizeof(int),1,sp);
     pt.x=j;
-    pt.y=i;             //chon ke moghe ye zakhire in daghighan location e cell e na jash rooye map
+    pt.y=i;
     fread(&temp_e,sizeof(int),1,sp);
     cell_name=(char*)calloc(8,sizeof(char));
     fread(cell_name,sizeof(char),8,sp);
@@ -249,5 +247,4 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
         c_count--;
     }
     *head_cell2=ch;
-
 }
