@@ -54,9 +54,44 @@ void write_file(FILE* fp,int ** arr,int n)
     }
 }
 
+FILE* map_opener(char** map_name)
+{
+    int i=1,n;
+    FILE* fyle=fopen("maps.txt","r");
+    char mapname[20];
+    printf("which one of the following maps would you want ? \n");
+    while(1)
+    {
+        fscanf(fyle,"%s",mapname);
+        printf("%d) %s\n",i,mapname);
+        i++;
+        if (feof(fyle))
+            break;
+    }
+    fseek(fyle,0,SEEK_SET);
+    scanf("%d",&n);
+    if (n>i){
+        printf("out of range\n");
+        *map_name=NULL;
+        return NULL;
+    }
+    for (i=0;i<n;i++)
+    {
+        fscanf(fyle,"%s",mapname);
+    }
+    printf("%s it is\n",mapname);
+    strcpy(*map_name,mapname);
+    FILE* fp=fopen(mapname,"rb");
+    if (fp==NULL)
+        printf("couldn't be opened!\n");
+
+    return fp;
+
+}
+
 void prnt_menu()
 {
-    printf("1)new map \n2)edit map\n3)exit\n");
+    printf("1)new map \n2)edit map\n3)save as text\n4)exit\n");
 }
 
 void map_editor(void)
@@ -126,44 +161,42 @@ void map_editor(void)
             fclose(fp);
 
         }
-        else if( act!=3)
+        else if (act==3)
+        {
+            char block_name [][20]={"Energy","Mitosis","Forbidden","Normal"},bn[20];
+            char* temp,c,mname[20];
+            temp=(char*)malloc(20*sizeof(char));
+            //mname=(char*)malloc(20*sizeof(char));
+            FILE* mp,*tp;
+            mp=map_opener(&temp);
+            printf("%s\n",temp);
+            strncpy(mname,temp,strlen(temp)-4);
+            printf("%s\n",mname);
+            strcat(mname,".txt");
+            printf("%s\n",mname);
+            tp=fopen(mname,"w+");
+            int n,i,j,tempint;
+            printf("SHIT");
+            fseek(mp,0,SEEK_SET);
+            fread(&n,sizeof(int),1,mp);
+            printf("n=%d\n",n);
+            for (i=0;i<n;i++)
+            {
+                for (j=0;j<n;j++)
+                {
+                    fread(&c,sizeof(char),1,mp);
+                    tempint=c-'1';
+                    strcpy(bn,block_name[tempint]);
+                    fprintf(tp,"%15s  ",bn);
+                }
+                fprintf(tp,"\n");
+            }
+            fclose(mp);
+            fclose(tp);
+        }
+        else if( act!=4)
             printf("Invalid num ! enter again \n");
-    } while (act!=3);     //mitooni ye show map ham bezari !
-}
-
-FILE* map_opener(char** map_name)
-{
-    int i=1,n;
-    FILE* fyle=fopen("maps.txt","r");
-    char mapname[20];
-    printf("which one of the following maps would you want ? \n");
-    while(1)
-    {
-        fscanf(fyle,"%s",mapname);
-        printf("%d) %s\n",i,mapname);
-        i++;
-        if (feof(fyle))
-            break;
-    }
-    fseek(fyle,0,SEEK_SET);
-    scanf("%d",&n);
-    if (n>i){
-        printf("out of range\n");
-        *map_name=NULL;
-        return NULL;
-    }
-    for (i=0;i<n;i++)
-    {
-        fscanf(fyle,"%s",mapname);
-    }
-    printf("%s it is\n",mapname);
-    strcpy(*map_name,mapname);
-    FILE* fp=fopen(mapname,"rb");
-    if (fp==NULL)
-        printf("couldn't be opened!\n");
-
-    return fp;
-
+    } while (act!=4);     //mitooni ye show map ham bezari !
 }
 
 int source_count(int **ma_p,int size)

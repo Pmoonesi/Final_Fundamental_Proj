@@ -133,7 +133,7 @@ int main()
         char* map_name;
         map_name=(char*)malloc(20*sizeof(char));
         int choice,num_players;
-        printf("[1]Load\n[2]New single player game\n[3]New multiplayer game\n[4]map editor\n[5]Exit\n");
+        printf("[1]Load\n[2]New single player game\n[3]New multiplayer game\n[4]Map editor\n[5]Exit\n");
         scanf("%d",&choice);
         int **ma_p;
         cell *cell_head1=NULL;
