@@ -5,10 +5,15 @@
 #include <math.h>
 #include "saveVaload.h"
 
+
+
 int clr[4]={14,2,4,1};
 int clr2[4]={14,10,12,9};
 int r=30;
-int TazMabda=2*r,AazMabda=3*r;
+int TazMabda=2*r,AazMabda=2*r;
+
+#define tool(size)  2*TazMabda+(size-1)*sqrt(3)*r
+#define arz(size)  2*AazMabda+((size-1)*2+1)*r
 
 point whereitat(point pos)
 {
@@ -23,6 +28,7 @@ point whereitat(point pos)
 
 void draw_map(int** ma_p,int size)
 {
+    setcolor(14);
     point temp;
     for (int i=0;i<size;i++)
     {
@@ -102,12 +108,17 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
     }
     else if (i==4)
     {
-        if (player==1)
-            save_game(*head,*cell_head1,*cell_head2,ma_p,size,map_name);
-        else
-            save_game(*head,*cell_head2,*cell_head1,ma_p,size,map_name);
+        if (player==1){
+            save_game(*head,*cell_head1,*cell_head2,ma_p,size,map_name,1);
+            play_that(head,cell_head1,cell_head2,ma_p,size,1,loop,map_name);
+        }
+        else{
+            save_game(*head,*cell_head2,*cell_head1,ma_p,size,map_name,2);
+            play_that(head,cell_head1,cell_head2,ma_p,size,2,loop,map_name);
+        }
     }
     else if (i==5){
+        point_cal_prnt(*cell_head1,*cell_head2,player);
         *loop=false;
         closegraph();
     }
@@ -117,10 +128,12 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
 
 int main()
 {
+
     srand(time(0));
     bool outloop=true;
     while(outloop){
         bool loop=true;
+        int turn=1;
         int size,cell_num;
         char* map_name;
         map_name=(char*)malloc(20*sizeof(char));
@@ -133,9 +146,9 @@ int main()
         node *head;
         if (choice==1)
         {
-            printf("[1]single player save\n[2]multiplayer save\n");
+            printf("[1]Single player save\n[2]Multiplayer save\n");
             scanf("%d",&num_players);
-            load_game(&head,&cell_head1,&cell_head2,&ma_p,&size,num_players,&map_name);
+            load_game(&head,&cell_head1,&cell_head2,&ma_p,&size,num_players,&map_name,&turn);
             if (map_name==NULL)
                 continue;
         }
@@ -176,16 +189,26 @@ int main()
             loop=false;
             outloop=false;
         }
-        initwindow(800,800);
+        initwindow(tool(size),arz(size));
+        getdefaultpalette();
         setfillstyle(1,BLACK);
-        bar(0,0,800,800);
+        bar(0,0,tool(size),arz(size));
         while (loop)
         {
+            if (turn==1){
             play_that(&head,&cell_head1,&cell_head2,ma_p,size,1,&loop,map_name);
             if (loop==false)
                 break;
             if(cell_head2!=NULL)
                 play_that(&head,&cell_head2,&cell_head1,ma_p,size,2,&loop,map_name);
+            }
+            else
+            {
+                play_that(&head,&cell_head2,&cell_head1,ma_p,size,2,&loop,map_name);
+                if (loop==false)
+                    break;
+                play_that(&head,&cell_head1,&cell_head2,ma_p,size,1,&loop,map_name);
+            }
         }
     }
     return 0;

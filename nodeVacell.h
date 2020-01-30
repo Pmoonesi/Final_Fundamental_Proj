@@ -524,3 +524,25 @@ int cell_count(cell* cell_head)
     }
     return res;
 }
+
+void point_cal_prnt(cell* head1,cell* head2,int player)
+{
+    cell*head2t=head2;
+    int res1=0,res2=0;
+    while(head1!=NULL)
+    {
+        res1=res1+head1->energy;
+        head1=head1->next;
+    }
+    while(head2!=NULL)
+    {
+        res2=res2+head2->energy;
+        head2=head2->next;
+    }
+    if (player==2)
+        printf("SCORE : player1 = %d\t player2 = %d\n",res2,res1);
+    else if (head2t!=NULL)
+        printf("SCORE : player1 = %d\t player2 = %d\n",res1,res2);
+    else
+        printf("SCORE : player1 = %d\n",res1);
+}

@@ -16,7 +16,7 @@ char* now()
     return buff;
 }
 
-void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int size,char* map_name)
+void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int size,char* map_name,int turn)
 {
     char savename[50];
     printf("name of save ? : (.bin) ");
@@ -35,6 +35,7 @@ void save_game(node* head_node,cell* head_cell1,cell*head_cell2,int** ma_p,int s
     int s_count,i,j,temp_s,dum,c_count,temp_e;
     strcpy(date,now());
     fwrite(date,sizeof(char),25,fp);
+    fwrite(&turn,sizeof(int),1,fp);
     s_count=source_count(ma_p,size);
     fwrite(&s_count,sizeof(int),1,fp);
     for (i=0;i<size;i++){
@@ -112,6 +113,13 @@ FILE* choosesave (int som,FILE** mp,char** map_name)
         i++;
 
     }
+    if (i==1)
+    {
+        printf("there is no saves in here !\n");
+        *map_name=NULL;
+        *mp=NULL;
+        return NULL;
+    }
     scanf("%d",&n);
     if (n>=i){
         printf("out of range\n");
@@ -135,15 +143,13 @@ FILE* choosesave (int som,FILE** mp,char** map_name)
     return fp;
 }
 
-void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int* size,int som,char** map_name)
+void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p,int* size,int som,char** map_name,int* turn)
 {
     FILE* fp,*sp;
     sp=choosesave(som,&fp,map_name);
 
-    if (sp==NULL){
-        printf("couldn't open saved file\n");
+    if (sp==NULL)
         return ;
-    }
 
     char date[25],*cell_name;
     int c_size,s_count,i,j,temp_s,c_count,temp_e;
@@ -158,6 +164,7 @@ void load_game (node** head_node,cell** head_cell1,cell** head_cell2,int ***ma_p
     *ma_p=read_file(fp);
     fclose(fp);
     *head_node=make_network(*ma_p,*size);
+    fread(turn,sizeof(int),1,sp);
     fread(&s_count,sizeof(int),1,sp);
     while (s_count>0)
     {

@@ -9,7 +9,8 @@ char* tomapsfolder(char* src)
 {
     char* temp="maps\\";
     char* res;
-    res=(char*)malloc((strlen(src)+strlen(temp)+10)*sizeof(char));
+    //printf("%d %d\n",strlen(src),strlen(temp));
+    res=(char*)malloc(50*sizeof(char));
     strcpy(res,temp);
     strcat(res,src);
     return res;
@@ -19,7 +20,7 @@ char* tosavesfolder(char* src)
 {
     char* temp="saves\\";
     char* res;
-    res=(char*)malloc((strlen(src)+strlen(temp)+10)*sizeof(char));
+    res=(char*)malloc(50*sizeof(char));
     strcpy(res,temp);
     strcat(res,src);
     return res;
@@ -29,7 +30,7 @@ char* toraw (char* src)
 {
     char temp[20];
     char* res;
-    res=(char*)malloc((strlen(src)-2)*sizeof(char));
+    res=(char*)malloc(50*sizeof(char));
     strncpy(temp,src,strlen(src)-4);
     temp[strlen(src)-4]='\0';
     strcpy(res,temp);
@@ -38,7 +39,7 @@ char* toraw (char* src)
 char* tobin (char* src)
 {
     char* res;
-    res=(char*)malloc((strlen(res)+4)*sizeof(char));
+    res=(char*)malloc(50*sizeof(char));
     strcpy(res,src);
     strcat(res,".bin");
     return res;
@@ -46,7 +47,7 @@ char* tobin (char* src)
 char* totxt (char* src)
 {
     char* res;
-    res=(char*)malloc((strlen(res)+4)*sizeof(char));
+    res=(char*)malloc(50*sizeof(char));
     strcpy(res,src);
     strcat(res,".txt");
     return res;
@@ -123,11 +124,14 @@ FILE* map_opener(char** map_name) //return of map name
     }
     if (n==i) //new name need
     {
+        //char* temp;
+        //temp=(char*)malloc(50*sizeof(char));
         fseek(fyle,0,SEEK_END);
         printf("map name ? (.bin) \n");
         scanf("%s",*map_name);
-        fprintf(fyle,"\n%s",tobin(*map_name));
-        fp=fopen(tomapsfolder(tobin(*map_name)),"rb");
+        *map_name=tobin(*map_name);
+        fprintf(fyle,"\n%s",*map_name);
+        fp=fopen(tomapsfolder(*map_name),"rb");
     }
     else{
         fseek(fyle,0,SEEK_SET);
@@ -141,6 +145,7 @@ FILE* map_opener(char** map_name) //return of map name
     }
     if (fp==NULL)
         printf("couldn't be opened!\n");
+    fclose(fyle);
     return fp;
 
 }
@@ -160,13 +165,13 @@ void map_editor(void)
         if (act==1)
         {
             int n,i=0;
-            char *fn,c,*temp,*temp2;
-            fn=(char*)malloc(20*sizeof(char));
+            char *fn,c;
+            fn=(char*)malloc(50*sizeof(char));
             printf("File name ? (max 20 chars) (.bin) : ");
             scanf("%s",fn);
-            temp=tobin(fn);
-            temp2=tomapsfolder(temp);
-            FILE *fp=fopen(temp2,"wb");
+            fn=tobin(fn);
+            fn=tomapsfolder(fn);
+            FILE *fp=fopen(fn,"wb");
             printf("Number of R&C : ");
             scanf("%d",&n);
             getchar();
@@ -186,7 +191,7 @@ void map_editor(void)
             point p;
             int n,flag=1,**arr,temp;
             char *fn;
-            fn=(char*)malloc(20*sizeof(char));
+            fn=(char*)malloc(50*sizeof(char));
             FILE *fp;
             fp=map_opener(&fn);
             if (fp==NULL){
@@ -225,15 +230,14 @@ void map_editor(void)
         }
         else if (act==3) //uses opener
         {
-            char block_name [][20]={"Energy","Mitosis","Forbidden","Normal"},bn[20];
-            char* temp,c,*mname;
-            temp=(char*)malloc(20*sizeof(char));
+            char block_name [][20]={"Energy","Mitosis","Forbidden","Normal"},bn[50];
+            char c,*mname;
             mname=(char*)malloc(50*sizeof(char));
             FILE* mp,*tp;
-            mp=map_opener(&temp);
-            //strncpy(mname,temp,strlen(temp)-4);
-            //strcat(mname,".txt");
-            mname=toraw(temp);
+            mp=map_opener(&mname);
+            //printf("%s\n",mname);
+            mname=toraw(mname);
+            //printf("%s\n",mname);
             mname=totxt(mname);
             mname=tomapsfolder(mname);
             tp=fopen(mname,"w+");
