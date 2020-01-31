@@ -511,7 +511,7 @@ void gain_energy(cell* head,int th)
         current->energy+=15;
         (current->location)->source-=15;
     }
-    printf("successfull boost\n");
+    printf("successfully done\n");
 }
 
 int cell_count(cell* cell_head)

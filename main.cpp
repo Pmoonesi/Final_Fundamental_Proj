@@ -12,7 +12,7 @@ int clr2[4]={14,10,12,9};
 int r=30;
 int TazMabda=2*r,AazMabda=2*r;
 
-#define tool(size)  2*TazMabda+(size-1)*sqrt(3)*r
+#define tool(size)  2*TazMabda+(size-1)*sqrt(3)*r+200
 #define arz(size)  2*AazMabda+((size-1)*2+1)*r
 
 point whereitat(point pos)
@@ -53,6 +53,7 @@ void show_cells(cell* cell_head1,cell* cell_head2,int size,int player)
     point temp;
     while(cell_head1!=NULL)
     {
+        outtextxy(tool(size)-175,50,"player1 : BLACK");
         temp=(cell_head1->location)->position;
         cell_r=(r*3/5.0)*(cell_head1->energy/100.0)+r*(1/5.0);
         temp.y=size-temp.y-1;
@@ -65,6 +66,7 @@ void show_cells(cell* cell_head1,cell* cell_head2,int size,int player)
         return ;
     while(cell_head2!=NULL)
     {
+        outtextxy(tool(size)-175,100,"player2 : WHITE");
         temp=(cell_head2->location)->position;
         cell_r=(r*3/5.0)*(cell_head2->energy/100.0)+r*(1/5.0);
         temp.y=size-temp.y-1;
@@ -79,6 +81,8 @@ void play_that(node** head,cell** cell_head1,cell** cell_head2,int** ma_p,int si
 {
     setfillstyle(1,BLACK);
     bar(0,0,800,800);
+    outtextxy(tool(size)-165,arz(size)-100,"DO NOT CLICK");
+    outtextxy(tool(size)-170,arz(size)-80,"ON THE SCREEN");
     printf("PLAYER%d 's turn\n",player);
     int p,i,j;
     //show_map(ma_p,size);
@@ -190,9 +194,9 @@ int main()
             outloop=false;
         }
         initwindow(tool(size),arz(size));
-        getdefaultpalette();
         setfillstyle(1,BLACK);
         bar(0,0,tool(size),arz(size));
+
         while (loop)
         {
             if (turn==1){
